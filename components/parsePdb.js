@@ -9,7 +9,6 @@ export const parsePdbFunction = async (ligand) => {
   const { data } = await axios.get(
     `https://files.rcsb.org/ligands/view/${ligand}_ideal.pdb`
   );
-
   const parsed = parsePdb(data);
   connectParsed = data.split("\n");
   connectParsed = connectParsed.filter((element) => element.includes("CONECT"));
