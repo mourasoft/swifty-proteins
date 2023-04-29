@@ -44,9 +44,14 @@ const HomeScreen = ({ navigation }) => {
     });
   }, [navigation]);
 
+  const navigatto = (item) => {
+    console.log("item", item);
+    navigation.navigate("Viewer", { ligand: item });
+  };
+
   const renderItem = useCallback(
     ({ item, index }) => (
-      <ItemView key={index} onPress={() => console.log("pressed")}>
+      <ItemView key={index} onPress={() => navigatto(item)}>
         <Ligand>{item}</Ligand>
       </ItemView>
     ),
