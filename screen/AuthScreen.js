@@ -58,7 +58,7 @@ const AuthScreen = ({ navigation }) => {
       <Container>
         <Title>swifty-proteins</Title>
 
-        <ImageContainer scale={0.75} source={Science} />
+        <ImageContainer scale={0.5} source={Science} />
 
         <Text>
           Transform your understanding of proteins with Swifty Protein
