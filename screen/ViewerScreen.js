@@ -47,7 +47,7 @@ const ViewerScreen = () => {
     //   0.1,
     //   1000
     // );
-    cameraRef.current.position.z = 10;
+    cameraRef.current.position.z = 15;
     // console.log(gl.drawingBufferWidth , gl.drawingBufferHeight);
     gl.canvas = {
       width: gl.drawingBufferWidth,
@@ -129,11 +129,11 @@ const ViewerScreen = () => {
     <Container>
       {
        (data && cameraRef?.current) ?
-          <OrbitControlsView  style={{ flex: 1 }} camera={cameraRef.current}>
+          <OrbitControlsView  style={{display: 'flex', flex: 1 }} camera={cameraRef.current}>
             <GLView
               onContextCreate={onContextCreate}
               // set height and width of GLView
-              style={{ width: 400, height: 400 }}
+              style={{ flex: 1 }}
             />
            </OrbitControlsView>
           : <Text>Loading ....aa</Text>
@@ -144,7 +144,7 @@ const ViewerScreen = () => {
 
 const Container = styled.View`
   flex: 1;
-  background-color: #fff;
+  background-color: #FFf;
 `;
 
 export default ViewerScreen;
