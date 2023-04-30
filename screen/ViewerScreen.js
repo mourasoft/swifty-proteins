@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Button, TouchableOpacity } from "react-native";
 import Expo from "expo";
 import {
   Scene,
@@ -11,6 +11,8 @@ import {
   Vector3,
   MeshStandardMaterial,
   DirectionalLight,
+  AmbientLight,
+  MeshMatcapMaterial,
 } from "three";
 import ExpoTHREE, { Renderer } from "expo-three";
 import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
@@ -19,8 +21,9 @@ import { parsePdbFunction } from "../components/parsePdb";
 import styled from "styled-components";
 import { CylinderGeometry } from "three";
 import OrbitControlsView from "../components/OrbitControlsView";
-
-const ViewerScreen = () => {
+import { GestureHandler } from 'expo';
+const ViewerScreen = ({ route }) => {
+  const { ligand } = route.params
   const cameraRef = useRef(new PerspectiveCamera(
     50,
     1100 / 1100,
@@ -30,50 +33,59 @@ const ViewerScreen = () => {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState()
   const getData = async () => {
-    let res = await parsePdbFunction('18Q');
-    console.log(res);
+    let res = await parsePdbFunction(ligand);
     setData(res)
   }
+  const orbitRef = useRef(null);
+
   // cameraRef.current =  
+  const handleZoomIn = () => {
+    if (cameraRef) {
+      if (orbitRef.current) {
+        const controls = orbitRef.current;
+        controls.getControls().dollyOut(0.95 ** 1.0);
+        controls.getControls().update();
+      }
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (cameraRef) {
+      if (orbitRef.current) {
+        const controls = orbitRef.current;
+        controls.getControls().dollyIn(0.95 ** 1.0);
+        controls.getControls().update();
+      }
+    }
+  };
   const onContextCreate = async (gl) => {
     // three.js implementation.
     const scene = new Scene();
-    const directionalLight = new DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(0, 3, 3);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(0, 10, 0); // position above the scene
+    directionalLight.target.position.set(0, 0, 0);
     scene.add(directionalLight);
-    // cameraRef.current = new PerspectiveCamera(
-    //   50,
-    //   gl.drawingBufferWidth / gl.drawingBufferHeight,
-    //   0.1,
-    //   1000
-    // );
     cameraRef.current.position.z = 15;
-    // console.log(gl.drawingBufferWidth , gl.drawingBufferHeight);
     gl.canvas = {
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
     };
-
-    // set camera position away from sphere
     const renderer = new Renderer({ gl });
-    // set size of buffer to be equal to drawing buffer width
     renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-    // create render function
     const render = () => {
       requestAnimationFrame(render);
+      // console.log(cameraRef.current);
       renderer.render(scene, cameraRef.current);
       gl.endFrameEXP();
     };
 
     if (data) {
-      // create atom material
-      const atomMaterial = new MeshStandardMaterial({
+      const atomMaterial = new MeshMatcapMaterial({
         color: "red",
       });
 
-      // create bond material
-      const bondMaterial = new MeshStandardMaterial({
+      const bondMaterial = new MeshMatcapMaterial({
         color: "green",
       });
       const atoms = [];
@@ -102,8 +114,7 @@ const ViewerScreen = () => {
             (startAtom.y),
             (startAtom.z)
           );
-          mesh.lookAt(new Vector3(endAtom.x, endAtom.y, endAtom.z)); // Orient towards end atom
-
+          mesh.lookAt(new Vector3(endAtom.x, endAtom.y, endAtom.z));
           scene.add(mesh);
           bonds.push(mesh);
         })
@@ -117,34 +128,79 @@ const ViewerScreen = () => {
   useEffect(() => {
     getData()
   }, [])
-  useEffect(() => {
-    // console.log(cameraRef.current);
-    // setTimeout(() => {
-      setLoading(prev => !prev);
-      // setLoading(!loading);
-    // }, (1000));
-    // }, (1000));
-  }, [])
   return (
     <Container>
       {
-       (data && cameraRef?.current) ?
-          <OrbitControlsView  style={{display: 'flex', flex: 1 }} camera={cameraRef.current}>
+        (data && cameraRef?.current) ? <View style={{ display: 'flex', flex: 1 }}>
+          <OrbitControlsView ref={orbitRef} style={{ flex: 1 }} camera={cameraRef.current} enableZoom={true}>
             <GLView
               onContextCreate={onContextCreate}
-              // set height and width of GLView
               style={{ flex: 1 }}
             />
-           </OrbitControlsView>
+          </OrbitControlsView>
+          <BottonsWrraper>
+            <BottonStyle title="-" onPress={handleZoomIn}>
+              <TextStyle>
+                +
+              </TextStyle>
+            </BottonStyle>
+            <BottonStyle title="+" onPress={handleZoomOut}>
+              <TextStyle>
+                -
+              </TextStyle>
+            </BottonStyle>
+
+          </BottonsWrraper>
+        </View>
           : <Text>Loading ....aa</Text>
       }
     </Container>
   );
 };
 
+const ButtonStyle1 = {
+  minWidth: 100,
+  backgroundColor: 'red',
+  borderWidth: 10,
+  borderColor: 'red',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 10,
+};
+
 const Container = styled.View`
   flex: 1;
   background-color: #FFf;
 `;
+const BottonsWrraper = styled.View`
+  width: 100%;
+  /* background-color: #FFf; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 100;
+  padding-top: 10px;
+`;
+
+const BottonStyle = styled.TouchableOpacity`
+  min-width: 40px;
+  min-height: 40px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E97560;
+  border-radius: 12px;
+  `
+
+const TextStyle = styled.Text`
+  color: #FFFF;
+  font-size: 25px;
+`
 
 export default ViewerScreen;
