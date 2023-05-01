@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Button, TouchableOpacity } from "react-native";
+import { View, Text, Button, TouchableOpacity, Modal } from "react-native";
 import Expo from "expo";
 import {
   Scene,
@@ -13,6 +13,7 @@ import {
   DirectionalLight,
   AmbientLight,
   MeshMatcapMaterial,
+  OneMinusDstAlphaFactor,
 } from "three";
 import ExpoTHREE, { Renderer } from "expo-three";
 import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
@@ -22,6 +23,7 @@ import styled from "styled-components";
 import { CylinderGeometry } from "three";
 import OrbitControlsView from "../components/OrbitControlsView";
 import { GestureHandler } from 'expo';
+import CustomModal from "../components/Modal";
 const ViewerScreen = ({ route }) => {
   const { ligand } = route.params
   const cameraRef = useRef(new PerspectiveCamera(
@@ -30,7 +32,8 @@ const ViewerScreen = ({ route }) => {
     0.1,
     1000
   ));
-  const [loading, setLoading] = useState(true)
+  const [visible, setVisible] = useState(false)
+  const [objects, setObjects] = useState([]);
   const [data, setData] = useState()
   const getData = async () => {
     let res = await parsePdbFunction(ligand);
@@ -56,6 +59,25 @@ const ViewerScreen = ({ route }) => {
         controls.getControls().dollyIn(0.95 ** 1.0);
         controls.getControls().update();
       }
+    }
+  };
+  const intersect = ({ nativeEvent }) => {
+    const { locationX: x, locationY: y } = nativeEvent;
+    const mouse3D = new THREE.Vector3(
+      (x / window.innerWidth) * 2 - 1,
+      -(y / window.innerHeight) * 2 + 1,
+      0.5
+
+    );
+    
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse3D, cameraRef.current);
+    console.log(objects);
+    const intersects = raycaster.intersectObjects(objects);
+    // const intersects = raycaster.intersectObjects(objects);
+    if (intersects.length > 0) {
+      // setAtomData(JSON.parse(intersects[0].object.name));
+      setVisible(true);
     }
   };
   const onContextCreate = async (gl) => {
@@ -95,6 +117,7 @@ const ViewerScreen = ({ route }) => {
         const mesh = new Mesh(geometry, atomMaterial);
         mesh.position.set(atom.x, atom.y, atom.z);
         scene.add(mesh);
+        setObjects((prev) => [...prev, mesh]);
         atoms.push(mesh);
       });
       data.connectData.forEach((bond, index) => {
@@ -116,6 +139,7 @@ const ViewerScreen = ({ route }) => {
           );
           mesh.lookAt(new Vector3(endAtom.x, endAtom.y, endAtom.z));
           scene.add(mesh);
+          setObjects((prev) => [...prev, mesh]);
           bonds.push(mesh);
         })
       });
@@ -132,7 +156,11 @@ const ViewerScreen = ({ route }) => {
     <Container>
       {
         (data && cameraRef?.current) ? <View style={{ display: 'flex', flex: 1 }}>
-          <OrbitControlsView ref={orbitRef} style={{ flex: 1 }} camera={cameraRef.current} enableZoom={true}>
+          <OrbitControlsView ref={orbitRef} style={{ flex: 1 }} camera={cameraRef.current} enableZoom={true} onTouchEndCapture={(event) => {
+            const { locationX: x, locationY: y } = event.nativeEvent;
+            // if (x == start.x && y == start.y) 
+            intersect(event);
+          }}>
             <GLView
               onContextCreate={onContextCreate}
               style={{ flex: 1 }}
@@ -154,6 +182,7 @@ const ViewerScreen = ({ route }) => {
         </View>
           : <Text>Loading ....aa</Text>
       }
+     <CustomModal visible={visible} name={'name'} color={'#EF26E'} />
     </Container>
   );
 };
