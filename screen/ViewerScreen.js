@@ -24,17 +24,16 @@ import { CylinderGeometry } from "three";
 import OrbitControlsView from "../components/OrbitControlsView";
 import { GestureHandler } from 'expo';
 import CustomModal from "../components/Modal";
+import cpkData from "../utils/data.json";
+
 const ViewerScreen = ({ route }) => {
   const { ligand } = route.params
-  const cameraRef = useRef(new PerspectiveCamera(
-    50,
-    1100 / 1100,
-    0.1,
-    1000
-  ));
+  const cameraRef = useRef()
   const [visible, setVisible] = useState(false)
   const [objects, setObjects] = useState([]);
+  const [aspectRatio, setAspectratop] = useState([]);
   const [data, setData] = useState()
+  const [datatoshow, setDatatoshow] = useState()
   const getData = async () => {
     let res = await parsePdbFunction(ligand);
     setData(res)
@@ -64,19 +63,20 @@ const ViewerScreen = ({ route }) => {
   const intersect = ({ nativeEvent }) => {
     const { locationX: x, locationY: y } = nativeEvent;
     const mouse3D = new THREE.Vector3(
-      (x / window.innerWidth) * 2 - 1,
-      -(y / window.innerHeight) * 2 + 1,
+      (x / aspectRatio.width) * 2 - 1,
+      -(y / aspectRatio.height) * 2 + 1,
       0.5
 
     );
-    
+
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse3D, cameraRef.current);
-    console.log(objects);
+    // console.log(objects);
     const intersects = raycaster.intersectObjects(objects);
     // const intersects = raycaster.intersectObjects(objects);
     if (intersects.length > 0) {
-      // setAtomData(JSON.parse(intersects[0].object.name));
+      // console.log(intersects[0].object.name);
+      setDatatoshow(JSON.parse(intersects[0].object.name));
       setVisible(true);
     }
   };
@@ -87,6 +87,12 @@ const ViewerScreen = ({ route }) => {
     directionalLight.position.set(0, 10, 0); // position above the scene
     directionalLight.target.position.set(0, 0, 0);
     scene.add(directionalLight);
+    cameraRef.current = new PerspectiveCamera(
+      50,
+      gl.drawingBufferWidth / gl.drawingBufferHeight,
+      0.1,
+      1000
+    )
     cameraRef.current.position.z = 15;
     gl.canvas = {
       width: gl.drawingBufferWidth,
@@ -97,25 +103,31 @@ const ViewerScreen = ({ route }) => {
 
     const render = () => {
       requestAnimationFrame(render);
-      // console.log(cameraRef.current);
       renderer.render(scene, cameraRef.current);
       gl.endFrameEXP();
     };
 
     if (data) {
-      const atomMaterial = new MeshMatcapMaterial({
-        color: "red",
-      });
-
+      
       const bondMaterial = new MeshMatcapMaterial({
-        color: "green",
+        // color: "green",
       });
       const atoms = [];
       const bonds = [];
       data.atoms.forEach((atom) => {
+        const dataatom = cpkData[atom.element]
+        const atomMaterial = new MeshMatcapMaterial({
+          color: `#${ dataatom.Rasmol}`,
+        });
         const geometry = new SphereGeometry(0.3, 32, 32);
         const mesh = new Mesh(geometry, atomMaterial);
         mesh.position.set(atom.x, atom.y, atom.z);
+        mesh.name = JSON.stringify({
+          name: dataatom.name,
+          element: atom.element,
+          discoverdBy: dataatom.discoverd_by,
+          phase: dataatom.phase,
+        })
         scene.add(mesh);
         setObjects((prev) => [...prev, mesh]);
         atoms.push(mesh);
@@ -155,12 +167,21 @@ const ViewerScreen = ({ route }) => {
   return (
     <Container>
       {
-        (data && cameraRef?.current) ? <View style={{ display: 'flex', flex: 1 }}>
-          <OrbitControlsView ref={orbitRef} style={{ flex: 1 }} camera={cameraRef.current} enableZoom={true} onTouchEndCapture={(event) => {
-            const { locationX: x, locationY: y } = event.nativeEvent;
-            // if (x == start.x && y == start.y) 
-            intersect(event);
-          }}>
+        (data) ? <View style={{ display: 'flex', flex: 1 }}>
+          <OrbitControlsView ref={orbitRef}
+            style={{ flex: 1 }} camera={cameraRef.current} enableZoom={true} onTouchEndCapture={(event) => {
+              const { locationX: x, locationY: y } = event.nativeEvent;
+              // if (x == start.x && y == start.y) 
+              intersect(event);
+            }}
+            onLayout={(event) => {
+              var { width, height } = event.nativeEvent.layout;
+              setAspectratop({
+                width: width,
+                height: height,
+              });
+            }}
+          >
             <GLView
               onContextCreate={onContextCreate}
               style={{ flex: 1 }}
@@ -182,7 +203,7 @@ const ViewerScreen = ({ route }) => {
         </View>
           : <Text>Loading ....aa</Text>
       }
-     <CustomModal visible={visible} name={'name'} color={'#EF26E'} />
+      <CustomModal data={datatoshow} visible={visible} setVisible={setVisible} />
     </Container>
   );
 };
