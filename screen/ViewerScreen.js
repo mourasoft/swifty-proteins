@@ -15,6 +15,7 @@ import {
   MeshMatcapMaterial,
   OneMinusDstAlphaFactor,
 } from "three";
+import Loading from "../components/Loading";
 import ExpoTHREE, { Renderer } from "expo-three";
 import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
 import { StatusBar } from "expo-status-bar";
@@ -22,25 +23,25 @@ import { parsePdbFunction } from "../components/parsePdb";
 import styled from "styled-components";
 import { CylinderGeometry } from "three";
 import OrbitControlsView from "../components/OrbitControlsView";
-import { GestureHandler } from 'expo';
+import { GestureHandler } from "expo";
 import CustomModal from "../components/Modal";
 import cpkData from "../utils/data.json";
 
 const ViewerScreen = ({ route }) => {
-  const { ligand } = route.params
-  const cameraRef = useRef()
-  const [visible, setVisible] = useState(false)
+  const { ligand } = route.params;
+  const cameraRef = useRef();
+  const [visible, setVisible] = useState(false);
   const [objects, setObjects] = useState([]);
   const [aspectRatio, setAspectratop] = useState([]);
-  const [data, setData] = useState()
-  const [datatoshow, setDatatoshow] = useState()
+  const [data, setData] = useState();
+  const [datatoshow, setDatatoshow] = useState();
   const getData = async () => {
     let res = await parsePdbFunction(ligand);
-    setData(res)
-  }
+    setData(res);
+  };
   const orbitRef = useRef(null);
 
-  // cameraRef.current =  
+  // cameraRef.current =
   const handleZoomIn = () => {
     if (cameraRef) {
       if (orbitRef.current) {
@@ -66,7 +67,6 @@ const ViewerScreen = ({ route }) => {
       (x / aspectRatio.width) * 2 - 1,
       -(y / aspectRatio.height) * 2 + 1,
       0.5
-
     );
 
     const raycaster = new THREE.Raycaster();
@@ -92,7 +92,7 @@ const ViewerScreen = ({ route }) => {
       gl.drawingBufferWidth / gl.drawingBufferHeight,
       0.1,
       1000
-    )
+    );
     cameraRef.current.position.z = 15;
     gl.canvas = {
       width: gl.drawingBufferWidth,
@@ -108,16 +108,15 @@ const ViewerScreen = ({ route }) => {
     };
 
     if (data) {
-      
       const bondMaterial = new MeshMatcapMaterial({
         // color: "green",
       });
       const atoms = [];
       const bonds = [];
       data.atoms.forEach((atom) => {
-        const dataatom = cpkData[atom.element]
+        const dataatom = cpkData[atom.element];
         const atomMaterial = new MeshMatcapMaterial({
-          color: `#${ dataatom.Rasmol}`,
+          color: `#${dataatom?.Rasmol || "FFFFF"}`,
         });
         const geometry = new SphereGeometry(0.3, 32, 32);
         const mesh = new Mesh(geometry, atomMaterial);
@@ -127,51 +126,53 @@ const ViewerScreen = ({ route }) => {
           element: atom.element,
           discoverdBy: dataatom.discoverd_by,
           phase: dataatom.phase,
-        })
+        });
         scene.add(mesh);
         setObjects((prev) => [...prev, mesh]);
         atoms.push(mesh);
       });
       data.connectData.forEach((bond, index) => {
         bond.forEach((item, key, arr) => {
-          if (key === 0)
-            return;
+          if (key === 0) return;
           const startAtom = data.serials[arr[0]];
           const endAtom = data.serials[item];
-          const distance = Math.sqrt((endAtom.x - startAtom.x) ** 2 + (endAtom.y - startAtom.y) ** 2 + (endAtom.z - startAtom.z) ** 2);
+          const distance = Math.sqrt(
+            (endAtom.x - startAtom.x) ** 2 +
+              (endAtom.y - startAtom.y) ** 2 +
+              (endAtom.z - startAtom.z) ** 2
+          );
           const geometry = new CylinderGeometry(0.1, 0.1, distance, 32);
           geometry.translate(0, distance / 2, 0);
           geometry.rotateX(Math.PI / 2);
           const mesh = new Mesh(geometry, bondMaterial);
 
-          mesh.position.set(
-            (startAtom.x),
-            (startAtom.y),
-            (startAtom.z)
-          );
+          mesh.position.set(startAtom.x, startAtom.y, startAtom.z);
           mesh.lookAt(new Vector3(endAtom.x, endAtom.y, endAtom.z));
           scene.add(mesh);
           setObjects((prev) => [...prev, mesh]);
           bonds.push(mesh);
-        })
+        });
       });
-    }
-    else {
-      console.log('errot dat');
+    } else {
+      console.log("errot dat");
     }
     render();
   };
   useEffect(() => {
-    getData()
-  }, [])
+    getData();
+  }, []);
   return (
     <Container>
-      {
-        (data) ? <View style={{ display: 'flex', flex: 1 }}>
-          <OrbitControlsView ref={orbitRef}
-            style={{ flex: 1 }} camera={cameraRef.current} enableZoom={true} onTouchEndCapture={(event) => {
+      {data ? (
+        <View style={{ display: "flex", flex: 1 }}>
+          <OrbitControlsView
+            ref={orbitRef}
+            style={{ flex: 1 }}
+            camera={cameraRef.current}
+            enableZoom={true}
+            onTouchEndCapture={(event) => {
               const { locationX: x, locationY: y } = event.nativeEvent;
-              // if (x == start.x && y == start.y) 
+              // if (x == start.x && y == start.y)
               intersect(event);
             }}
             onLayout={(event) => {
@@ -182,45 +183,42 @@ const ViewerScreen = ({ route }) => {
               });
             }}
           >
-            <GLView
-              onContextCreate={onContextCreate}
-              style={{ flex: 1 }}
-            />
+            <GLView onContextCreate={onContextCreate} style={{ flex: 1 }} />
           </OrbitControlsView>
           <BottonsWrraper>
             <BottonStyle title="-" onPress={handleZoomIn}>
-              <TextStyle>
-                +
-              </TextStyle>
+              <TextStyle>+</TextStyle>
             </BottonStyle>
             <BottonStyle title="+" onPress={handleZoomOut}>
-              <TextStyle>
-                -
-              </TextStyle>
+              <TextStyle>-</TextStyle>
             </BottonStyle>
-
           </BottonsWrraper>
         </View>
-          : <Text>Loading ....aa</Text>
-      }
-      <CustomModal data={datatoshow} visible={visible} setVisible={setVisible} />
+      ) : (
+        <Loading />
+      )}
+      <CustomModal
+        data={datatoshow}
+        visible={visible}
+        setVisible={setVisible}
+      />
     </Container>
   );
 };
 
 const ButtonStyle1 = {
   minWidth: 100,
-  backgroundColor: 'red',
+  backgroundColor: "red",
   borderWidth: 10,
-  borderColor: 'red',
-  justifyContent: 'center',
-  alignItems: 'center',
+  borderColor: "red",
+  justifyContent: "center",
+  alignItems: "center",
   padding: 10,
 };
 
 const Container = styled.View`
   flex: 1;
-  background-color: #FFf;
+  background-color: #fff;
 `;
 const BottonsWrraper = styled.View`
   width: 100%;
@@ -244,13 +242,13 @@ const BottonStyle = styled.TouchableOpacity`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #E97560;
+  background: #e97560;
   border-radius: 12px;
-  `
+`;
 
 const TextStyle = styled.Text`
-  color: #FFFF;
+  color: #ffff;
   font-size: 25px;
-`
+`;
 
 export default ViewerScreen;
