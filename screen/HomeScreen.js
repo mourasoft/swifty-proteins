@@ -1,21 +1,13 @@
 import React, { useLayoutEffect, useState, useCallback } from "react";
 import useDebounce from "../hooks/useDebounce";
-import {
-  View,
-  Text,
-  FlatList,
-  Button,
-  SafeAreaView,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
+import { FlatList, SafeAreaView } from "react-native";
 import DATA from "../services/ligand.json";
 import NoData from "../components/Home/NoData";
 import styled from "styled-components";
 
 const HomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchTerm = useDebounce(searchQuery, 90); // 100ms delay in debouncing
+  const debouncedSearchTerm = useDebounce(searchQuery, 10); // 100ms delay in debouncing
 
   const filterData = (data, query) => {
     // filterData is a function that takes in data and query as parameters
@@ -45,7 +37,6 @@ const HomeScreen = ({ navigation }) => {
   }, [navigation]);
 
   const navigatto = (item) => {
-    console.log("item", item);
     navigation.navigate("Viewer", { ligand: item });
   };
 
@@ -61,6 +52,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView>
       <FlatList
+        style={{ marginTop: 10 }}
         data={filterData(DATA, debouncedSearchTerm)}
         ListEmptyComponent={() => <NoData query={debouncedSearchTerm} />}
         renderItem={renderItem}
@@ -76,22 +68,24 @@ export default HomeScreen;
 const Ligand = styled.Text`
   font-size: 25px;
   font-weight: 600;
-  color: #397066;
+  text-align: center;
+  letter-spacing: 3px;
+  color: #fff;
 `;
 
 const ItemView = styled.TouchableOpacity`
   background-color: #e97560;
+  padding-inline: 20px;
   border-radius: 4px;
   padding: 5px 20px;
   margin: 4px;
 `;
 
 const StyledInput = styled.TextInput`
-  display: flex;
-  justify-content: center;
-  width: 98%;
-  height: 40px;
-  border: 1px solid #ccc;
+  /* flex: 1; */
+  border: 1px solid red;
   border-radius: 10px;
   padding: 0 10px;
+  width: 96%;
+  min-height: 40px;
 `;
