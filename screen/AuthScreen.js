@@ -80,7 +80,7 @@ const Container = styled.View`
 const Title = styled.Text`
   font-size: 30px;
   font-weight: bold;
-  font-family: "rimouski";
+  /* font-family: "rimouski"; */
 `;
 
 const SubTitle = styled.Text``;
