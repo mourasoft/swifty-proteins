@@ -1,19 +1,10 @@
 import React, { useEffect } from "react";
-
-import {
-  Text,
-  View,
-  StyleSheet,
-  Button,
-  Alert,
-  AppState,
-  BackHandler,
-  Image,
-  SafeAreaView,
-} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, View, Button, Alert, AppState } from "react-native";
 import Science from "../assets/science.png";
 import * as LocalAuthentication from "expo-local-authentication";
 import styled from "styled-components";
+import useIsPortrait from "../hooks/useIsPortrait";
 
 const AuthScreen = ({ navigation }) => {
   const backAuth = () => {
@@ -53,17 +44,56 @@ const AuthScreen = ({ navigation }) => {
       Alert.alert("Authentication failed in catch method");
     }
   };
+
+  const orientation = useIsPortrait();
+  console.log("orientation", orientation);
   return (
-    <SafeAreaView>
-      <Container>
-        <Title>swifty-proteins</Title>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Container orientation={orientation}>
+        {orientation === "portrait" ? (
+          <>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Title>swifty-proteins</Title>
+              <ImageContainer scale={0.4} source={Science} />
 
-        <ImageContainer scale={0.5} source={Science} />
+              <SubTitle>
+                Transform your understanding of proteins with Swifty Protein
+              </SubTitle>
+              <Button title="Login" onPress={handleLogin} />
+            </View>
+          </>
+        ) : (
+          <>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <ImageContainer scale={0.4} source={Science} />
+            </View>
+            <View
+              style={{
+                flex: 1,
+                height: 100,
+              }}
+            >
+              <Title>swifty-proteins</Title>
 
-        <Text>
-          Transform your understanding of proteins with Swifty Protein
-        </Text>
-        <Button title="Sign in with Face ID" onPress={handleLogin} />
+              <SubTitle>
+                Transform your understanding of proteins with Swifty Protein
+              </SubTitle>
+              <Button title="Login" onPress={handleLogin} />
+            </View>
+          </>
+        )}
       </Container>
     </SafeAreaView>
   );
@@ -72,19 +102,28 @@ const AuthScreen = ({ navigation }) => {
 export default AuthScreen;
 
 const Container = styled.View`
-  display: flex;
+  flex: 1;
+  flex-direction: ${(props) =>
+    props.orientation === "portrait" ? "column" : "row"};
+  width: 100%;
+  height: 100%;
   justify-content: center;
   align-items: center;
+  padding: 10px;
 `;
 
 const Title = styled.Text`
   font-size: 30px;
   font-weight: bold;
-  font-family: "rimouski";
 `;
 
-const SubTitle = styled.Text``;
+const SubTitle = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  opacity: 0.5;
+`;
 
 const ImageContainer = styled.Image`
   transform: scale(${(props) => props.scale});
+  /* border: 1px solid black; */
 `;
