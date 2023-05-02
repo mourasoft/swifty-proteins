@@ -115,6 +115,7 @@ const Container = styled.View`
 const Title = styled.Text`
   font-size: 30px;
   font-weight: bold;
+
 `;
 
 const SubTitle = styled.Text`
