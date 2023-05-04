@@ -1,31 +1,23 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { View, Text, Button, TouchableOpacity, Modal } from "react-native";
+import { View, Button } from "react-native";
 import Expo from "expo";
 import { captureRef } from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
 import {
   Scene,
   Mesh,
-  MeshBasicMaterial,
   PerspectiveCamera,
-  SphereBufferGeometry,
   SphereGeometry,
   Vector3,
-  MeshStandardMaterial,
-  DirectionalLight,
-  AmbientLight,
   MeshMatcapMaterial,
-  OneMinusDstAlphaFactor,
 } from "three";
 import Loading from "../components/Loading";
 import ExpoTHREE, { Renderer } from "expo-three";
-import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
-import { StatusBar } from "expo-status-bar";
+import { GLView } from "expo-gl";
 import { parsePdbFunction } from "../components/parsePdb";
 import styled from "styled-components";
 import { CylinderGeometry } from "three";
 import OrbitControlsView from "../components/OrbitControlsView";
-import { GestureHandler } from "expo";
 import CustomModal from "../components/Modal";
 import cpkData from "../utils/data.json";
 import * as MediaLibrary from "expo-media-library";
@@ -35,6 +27,8 @@ const ViewerScreen = ({ route, navigation }) => {
   const { ligand } = route.params;
   const cameraRef = useRef();
   const [visible, setVisible] = useState(false);
+  const [isSphere, setIsSphere] = useState(true);
+  const [geomet, setGeometry] = useState();
   const [objects, setObjects] = useState([]);
   const [aspectRatio, setAspectratop] = useState([]);
   const [data, setData] = useState();
@@ -109,9 +103,16 @@ const ViewerScreen = ({ route, navigation }) => {
       }
     }
   };
+  useEffect(() => {
+    if (isSphere)
+      setGeometry(new SphereGeometry(0.3, 32, 32))
+    else
+      setGeometry(new THREE.BoxGeometry(0.3, 0.3, 0.3))
+  }, [isSphere])
   const onContextCreate = async (gl) => {
     // three.js implementation.
     const scene = new Scene();
+    scene.background = new THREE.Color(0xffffff);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(0, 10, 0); // position above the scene
     directionalLight.target.position.set(0, 0, 0);
@@ -147,8 +148,9 @@ const ViewerScreen = ({ route, navigation }) => {
         const atomMaterial = new MeshMatcapMaterial({
           color: `#${dataatom?.Rasmol || "FFF"}`,
         });
-        const geometry = new SphereGeometry(0.3, 32, 32);
-        const mesh = new Mesh(geometry, atomMaterial);
+        // const geometry = geomet;
+        // const geometry = new SphereGeometry(0.3, 32, 32);
+        const mesh = new Mesh(geomet, atomMaterial);
         mesh.position.set(atom.x, atom.y, atom.z);
         mesh.name = JSON.stringify({
           name: dataatom.name,
@@ -195,6 +197,7 @@ const ViewerScreen = ({ route, navigation }) => {
       {data ? (
         <View style={{ display: "flex", flex: 1 }}>
           <OrbitControlsView
+            key={isSphere}
             ref={orbitRef}
             style={{ flex: 1 }}
             camera={cameraRef.current}
@@ -229,7 +232,15 @@ const ViewerScreen = ({ route, navigation }) => {
             <BottonStyle title="+" onPress={handleZoomOut}>
               <TextStyle>-</TextStyle>
             </BottonStyle>
+            <BottonStyle title="Sphere" onPress={() => setIsSphere(true)}>
+              <TextStyle>Sphere</TextStyle>
+            </BottonStyle>
+            <BottonStyle title="Cube" onPress={() => setIsSphere(false)}>
+              <TextStyle>Cube</TextStyle>
+            </BottonStyle>
           </BottonsWrraper>
+          {/* <BottonsWrraper2>
+        </BottonsWrraper2> */}
         </View>
       ) : (
         <Loading />
@@ -274,6 +285,20 @@ const BottonsWrraper = styled.View`
   padding-top: 10px;
 `;
 
+const BottonsWrraper2 = styled.View`
+  width: 100%;
+  /* background-color: #FFf; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 100;
+  padding-top: 10px;
+`;
+
 const BottonStyle = styled.TouchableOpacity`
   min-width: 40px;
   min-height: 40px;
@@ -284,6 +309,7 @@ const BottonStyle = styled.TouchableOpacity`
   justify-content: center;
   background: #e97560;
   border-radius: 12px;
+  padding: 0px 10px 0px 10px;
 `;
 
 const TextStyle = styled.Text`
