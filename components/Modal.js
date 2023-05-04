@@ -1,21 +1,20 @@
-import React from 'react';
-import { Modal, View, Text, StyleSheet } from 'react-native';
-import styled from 'styled-components';
+import React from "react";
+import { Modal, View, Text, StyleSheet } from "react-native";
+import styled from "styled-components";
 
-
-const CustomModal = ({ data,visible, setVisible }) => {
+const CustomModal = ({ data, visible, setVisible }) => {
   console.log(data);
   return (
-    <Modal transparent visible={visible} animationType="slide" >
-      <View style={styles.modalContainer} >
-        <View style={[styles.modalView, { backgroundColor: 'white' }]}>
+    <Modal transparent visible={visible} animationType="slide">
+      <View style={styles.modalContainer}>
+        <View style={[styles.modalView, { backgroundColor: "white" }]}>
           <BottonStyle title="X" onPress={() => setVisible(false)}>
             <Text>X</Text>
           </BottonStyle>
-          <Text>{data?.discoverdBy}</Text>
-          <Text>{data?.element}</Text>
-          <Text>{data?.name}</Text>
-          <Text>{data?.phase}</Text>
+          <Text>{`Name: ${data?.name}`}</Text>
+          <Text>{`element: ${data?.element}`}</Text>
+          <Text>{`Phase: ${data?.phase}`}</Text>
+          <Text>{`Discoverd By: ${data?.discoverdBy}`}</Text>
           {/* <Text>{name}</Text> */}
         </View>
       </View>
@@ -36,20 +35,20 @@ const BottonStyle = styled.TouchableOpacity`
   border-radius: 12px;
   align-self: flex-end;
   /* color: #FFFF; */
-`
+`;
 
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
-    width: 200,
+    width: 250,
     height: 200,
     // justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 10,
   },
 });
