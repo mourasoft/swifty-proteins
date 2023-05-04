@@ -146,7 +146,7 @@ const ViewerScreen = ({ route, navigation }) => {
       data.atoms.forEach((atom) => {
         const dataatom = cpkData[atom.element];
         const atomMaterial = new MeshMatcapMaterial({
-          color: `#${dataatom?.Rasmol || "FFF"}`,
+          color: `#${dataatom?.Jmol || "FFF"}`,
         });
         // const geometry = geomet;
         // const geometry = new SphereGeometry(0.3, 32, 32);
