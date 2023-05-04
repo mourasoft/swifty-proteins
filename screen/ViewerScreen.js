@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { View, Text, Button, TouchableOpacity, Modal } from "react-native";
 import Expo from "expo";
+import { captureRef } from "react-native-view-shot";
+import * as FileSystem from "expo-file-system";
 import {
   Scene,
   Mesh,
@@ -26,8 +28,9 @@ import OrbitControlsView from "../components/OrbitControlsView";
 import { GestureHandler } from "expo";
 import CustomModal from "../components/Modal";
 import cpkData from "../utils/data.json";
+import * as MediaLibrary from "expo-media-library";
 
-const ViewerScreen = ({ route }) => {
+const ViewerScreen = ({ route, navigation }) => {
   const { ligand } = route.params;
   const cameraRef = useRef();
   const [visible, setVisible] = useState(false);
@@ -35,13 +38,24 @@ const ViewerScreen = ({ route }) => {
   const [aspectRatio, setAspectratop] = useState([]);
   const [data, setData] = useState();
   const [datatoshow, setDatatoshow] = useState();
+  const glViewRef = useRef(null);
+  const [status, requestPermission] = MediaLibrary.usePermissions();
+
+  if (status === null) {
+    requestPermission();
+  }
   const getData = async () => {
     let res = await parsePdbFunction(ligand);
     setData(res);
   };
   const orbitRef = useRef(null);
 
-  // cameraRef.current =
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button onPress={saveImage} title="Save" />,
+      title: `Molucule Name :${ligand}`,
+    });
+  }, [navigation]);
   const handleZoomIn = () => {
     if (cameraRef) {
       if (orbitRef.current) {
@@ -52,6 +66,25 @@ const ViewerScreen = ({ route }) => {
     }
   };
 
+  const saveImage = async () => {
+    const snapshot = await captureRef(glViewRef, {
+      format: "png",
+      quality: 1,
+    });
+
+    console.log("Totorina:", snapshot);
+    await MediaLibrary.saveToLibraryAsync(snapshot);
+    if (snapshot) {
+      alert("Saved!");
+    }
+    // const filePath = `${FileSystem.documentDirectory}${ligand}.png`;
+    // console.log("\n filepath", filePath);
+    // await FileSystem.writeAsStringAsync(filePath, snapshot, {
+    // encoding: FileSystem.EncodingType.Base64,
+    // }).then(() => {
+    // console.log("file saved");
+    // });
+  };
   const handleZoomOut = () => {
     if (cameraRef) {
       if (orbitRef.current) {
@@ -93,7 +126,7 @@ const ViewerScreen = ({ route }) => {
       0.1,
       1000
     );
-    cameraRef.current.position.z = 15;
+    cameraRef.current.position.z = 30;
     gl.canvas = {
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
@@ -116,7 +149,7 @@ const ViewerScreen = ({ route }) => {
       data.atoms.forEach((atom) => {
         const dataatom = cpkData[atom.element];
         const atomMaterial = new MeshMatcapMaterial({
-          color: `#${dataatom?.Rasmol || "FFFFF"}`,
+          color: `#${dataatom?.Rasmol || "FFF"}`,
         });
         const geometry = new SphereGeometry(0.3, 32, 32);
         const mesh = new Mesh(geometry, atomMaterial);
@@ -183,7 +216,11 @@ const ViewerScreen = ({ route }) => {
               });
             }}
           >
-            <GLView onContextCreate={onContextCreate} style={{ flex: 1 }} />
+            <GLView
+              onContextCreate={onContextCreate}
+              style={{ flex: 1 }}
+              ref={glViewRef}
+            />
           </OrbitControlsView>
           <BottonsWrraper>
             <BottonStyle title="-" onPress={handleZoomIn}>
