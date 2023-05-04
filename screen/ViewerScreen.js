@@ -31,6 +31,7 @@ import cpkData from "../utils/data.json";
 import * as MediaLibrary from "expo-media-library";
 
 const ViewerScreen = ({ route, navigation }) => {
+  const [start, setStart] = useState();
   const { ligand } = route.params;
   const cameraRef = useRef();
   const [visible, setVisible] = useState(false);
@@ -77,13 +78,6 @@ const ViewerScreen = ({ route, navigation }) => {
     if (snapshot) {
       alert("Saved!");
     }
-    // const filePath = `${FileSystem.documentDirectory}${ligand}.png`;
-    // console.log("\n filepath", filePath);
-    // await FileSystem.writeAsStringAsync(filePath, snapshot, {
-    // encoding: FileSystem.EncodingType.Base64,
-    // }).then(() => {
-    // console.log("file saved");
-    // });
   };
   const handleZoomOut = () => {
     if (cameraRef) {
@@ -109,8 +103,7 @@ const ViewerScreen = ({ route, navigation }) => {
     // const intersects = raycaster.intersectObjects(objects);
     if (intersects.length > 0) {
       // console.log(intersects[0].object.name);
-      if (intersects[0].object.name)
-      {
+      if (intersects[0].object.name) {
         setDatatoshow(JSON.parse(intersects[0].object.name));
         setVisible(true);
       }
@@ -174,8 +167,8 @@ const ViewerScreen = ({ route, navigation }) => {
           const endAtom = data.serials[item];
           const distance = Math.sqrt(
             (endAtom.x - startAtom.x) ** 2 +
-              (endAtom.y - startAtom.y) ** 2 +
-              (endAtom.z - startAtom.z) ** 2
+            (endAtom.y - startAtom.y) ** 2 +
+            (endAtom.z - startAtom.z) ** 2
           );
           const geometry = new CylinderGeometry(0.1, 0.1, distance, 32);
           geometry.translate(0, distance / 2, 0);
@@ -206,10 +199,14 @@ const ViewerScreen = ({ route, navigation }) => {
             style={{ flex: 1 }}
             camera={cameraRef.current}
             enableZoom={true}
+            onTouchStart={(event) => {
+              const { locationX: x, locationY: y } = event.nativeEvent;
+              setStart({ x, y });
+            }}
             onTouchEndCapture={(event) => {
               const { locationX: x, locationY: y } = event.nativeEvent;
-              // if (x == start.x && y == start.y)
-              intersect(event);
+              if (x == start.x && y == start.y)
+                intersect(event);
             }}
             onLayout={(event) => {
               var { width, height } = event.nativeEvent.layout;
@@ -238,11 +235,11 @@ const ViewerScreen = ({ route, navigation }) => {
         <Loading />
       )}
       {
-        datatoshow && 
+        datatoshow &&
         <CustomModal
-        data={datatoshow}
-        visible={visible}
-        setVisible={setVisible}
+          data={datatoshow}
+          visible={visible}
+          setVisible={setVisible}
         />
       }
     </Container>
