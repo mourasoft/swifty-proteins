@@ -109,8 +109,11 @@ const ViewerScreen = ({ route, navigation }) => {
     // const intersects = raycaster.intersectObjects(objects);
     if (intersects.length > 0) {
       // console.log(intersects[0].object.name);
-      setDatatoshow(JSON.parse(intersects[0].object.name));
-      setVisible(true);
+      if (intersects[0].object.name)
+      {
+        setDatatoshow(JSON.parse(intersects[0].object.name));
+        setVisible(true);
+      }
     }
   };
   const onContextCreate = async (gl) => {
@@ -234,11 +237,14 @@ const ViewerScreen = ({ route, navigation }) => {
       ) : (
         <Loading />
       )}
-      <CustomModal
+      {
+        datatoshow && 
+        <CustomModal
         data={datatoshow}
         visible={visible}
         setVisible={setVisible}
-      />
+        />
+      }
     </Container>
   );
 };
