@@ -23,7 +23,9 @@ export default function App() {
         />
 
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Viewer" component={ViewerScreen} />
+        <Stack.Screen name="Viewer" component={ViewerScreen} 
+          options={{orientation: "portrait" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
