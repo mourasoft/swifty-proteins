@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View, Button, Alert, AppState } from "react-native";
-import Science from "../assets/science.png";
+import { Alert, AppState } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
-import styled from "styled-components";
 import useIsPortrait from "../hooks/useIsPortrait";
+import PortraitView from "../components/Auth/PortraitView";
+import LandscapeView from "../components/Auth/LandscapeView";
+import { Container } from "../styles/StyledAuth";
 
 const AuthScreen = ({ navigation }) => {
   const backAuth = () => {
@@ -13,7 +14,6 @@ const AuthScreen = ({ navigation }) => {
   };
   useEffect(() => {
     AppState.addEventListener("change", (state) => {
-      console.log("state", state);
       if (state === "inactive" || state === "background") backAuth();
     });
   }, [navigation]);
@@ -46,53 +46,14 @@ const AuthScreen = ({ navigation }) => {
   };
 
   const orientation = useIsPortrait();
-  console.log("orientation", orientation);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Container orientation={orientation}>
         {orientation === "portrait" ? (
-          <>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Title>swifty-proteins</Title>
-              <ImageContainer scale={0.4} source={Science} />
-
-              <SubTitle>
-                Transform your understanding of proteins with Swifty Protein
-              </SubTitle>
-              <Button title="Login" onPress={handleLogin} />
-            </View>
-          </>
+          <PortraitView handleLogin={handleLogin} />
         ) : (
-          <>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <ImageContainer scale={0.4} source={Science} />
-            </View>
-            <View
-              style={{
-                flex: 1,
-                height: 100,
-              }}
-            >
-              <Title>swifty-proteins</Title>
-
-              <SubTitle>
-                Transform your understanding of proteins with Swifty Protein
-              </SubTitle>
-              <Button title="Login" onPress={handleLogin} />
-            </View>
-          </>
+          <LandscapeView handleLogin={handleLogin} />
         )}
       </Container>
     </SafeAreaView>
@@ -100,31 +61,3 @@ const AuthScreen = ({ navigation }) => {
 };
 
 export default AuthScreen;
-
-const Container = styled.View`
-  flex: 1;
-  flex-direction: ${(props) =>
-    props.orientation === "portrait" ? "column" : "row"};
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-`;
-
-const Title = styled.Text`
-  font-size: 30px;
-  font-weight: bold;
-
-`;
-
-const SubTitle = styled.Text`
-  font-size: 20px;
-  font-weight: bold;
-  opacity: 0.5;
-`;
-
-const ImageContainer = styled.Image`
-  transform: scale(${(props) => props.scale});
-  /* border: 1px solid black; */
-`;
