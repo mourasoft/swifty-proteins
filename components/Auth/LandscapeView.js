@@ -1,9 +1,14 @@
 import React from "react";
-import { View, Button } from "react-native";
-import { Title, SubTitle, ImageContainer } from "../../styles/StyledAuth";
+import { View, Text } from "react-native";
+import {
+  Title,
+  SubTitle,
+  ImageContainer,
+  StyledBtn,
+} from "../../styles/StyledAuth";
 import Science from "../../assets/science.png";
 
-const LandscapeView = () => {
+const LandscapeView = ({ handleLogin }) => {
   return (
     <>
       <View
@@ -13,12 +18,14 @@ const LandscapeView = () => {
           alignItems: "center",
         }}
       >
-        <ImageContainer scale={0.4} source={Science} />
+        <ImageContainer scale={1} source={Science} />
       </View>
       <View
         style={{
           flex: 1,
-          height: 100,
+          // height: 100,
+          justifyContent: "space-evenly",
+          alignItems: "center",
         }}
       >
         <Title>swifty-proteins</Title>
@@ -26,7 +33,11 @@ const LandscapeView = () => {
         <SubTitle>
           Transform your understanding of proteins with Swifty Protein
         </SubTitle>
-        <Button title="Login" onPress={handleLogin} />
+        <StyledBtn onPress={handleLogin}>
+          <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
+            login
+          </Text>
+        </StyledBtn>
       </View>
     </>
   );

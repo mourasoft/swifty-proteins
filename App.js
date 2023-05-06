@@ -14,7 +14,7 @@ export default function App() {
         <Stack.Screen
           name="Splash"
           component={SplashScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, orientation: "portrait" }}
         />
         <Stack.Screen
           name="Auth"
