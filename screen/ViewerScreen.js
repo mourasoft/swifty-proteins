@@ -244,7 +244,7 @@ const ViewerScreen = ({ route, navigation }) => {
           <OrbitControlsView
             key={[isSphere, portrait]}
             ref={orbitRef}
-            style={{ flex: 1, backgroundColor: "red" }}
+            style={{ flex: 1 }}
             camera={cameraRef.current}
             enableZoom={true}
             onTouchStart={(event) => {
