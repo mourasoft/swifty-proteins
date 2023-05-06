@@ -22,6 +22,7 @@ import OrbitControlsView from "../components/OrbitControlsView";
 import CustomModal from "../components/Modal";
 import cpkData from "../utils/data.json";
 import * as MediaLibrary from "expo-media-library";
+import useIsPortrait from "../hooks/useIsPortrait";
 
 const ViewerScreen = ({ route, navigation }) => {
   const { ligand } = route.params;
@@ -32,6 +33,7 @@ const ViewerScreen = ({ route, navigation }) => {
   const [isSphere, setIsSphere] = useState(true);
   const [datatoshow, setDatatoshow] = useState();
   const [aspectRatio, setAspectratop] = useState([]);
+  const portrait = useIsPortrait();
   const cameraRef = useRef();
   const [data, setData] = useState();
   const glViewRef = useRef(null);
@@ -150,7 +152,7 @@ const ViewerScreen = ({ route, navigation }) => {
   useEffect(() => {
     if (isSphere) setGeometry(new SphereGeometry(0.3, 32, 32));
     else setGeometry(new THREE.BoxGeometry(0.3, 0.3, 0.3));
-  }, [isSphere]);
+  }, [isSphere, portrait]);
   const onContextCreate = async (gl) => {
     // three.js implementation.
     const scene = new Scene();
@@ -237,12 +239,12 @@ const ViewerScreen = ({ route, navigation }) => {
 
   return (
     <Container>
-      {(data) ? (
+      {data ? (
         <View style={{ display: "flex", flex: 1 }}>
           <OrbitControlsView
-            key={isSphere}
+            key={[isSphere, portrait]}
             ref={orbitRef}
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor: "red" }}
             camera={cameraRef.current}
             enableZoom={true}
             onTouchStart={(event) => {
