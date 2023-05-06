@@ -31,7 +31,7 @@ const AuthScreen = ({ navigation }) => {
       const authenticated = await LocalAuthentication.authenticateAsync(
         options
       );
-      console.log("auth", authenticated);
+
       if (authenticated.success) {
         navigation.reset({ index: 0, routes: [{ name: "Home" }] });
       } else {

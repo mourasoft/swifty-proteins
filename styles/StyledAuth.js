@@ -27,10 +27,4 @@ const ImageContainer = styled.Image`
   /* border: 1px solid black; */
 `;
 
-const customView = styled.View`
- flex: 1,
-          justify-content: center,
-            align-items: center,
-`;
-
 export { Container, Title, SubTitle, ImageContainer };
