@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { View, Button } from "react-native";
 import Expo from "expo";
 import { captureRef } from "react-native-view-shot";
+import Icon from "react-native-vector-icons/FontAwesome";
 import * as FileSystem from "expo-file-system";
 import {
   Scene,
@@ -23,34 +24,63 @@ import cpkData from "../utils/data.json";
 import * as MediaLibrary from "expo-media-library";
 
 const ViewerScreen = ({ route, navigation }) => {
-  const [start, setStart] = useState();
   const { ligand } = route.params;
-  const cameraRef = useRef();
-  const [visible, setVisible] = useState(false);
-  const [isSphere, setIsSphere] = useState(true);
+  const [start, setStart] = useState();
   const [geomet, setGeometry] = useState();
+  const [visible, setVisible] = useState(false);
   const [objects, setObjects] = useState([]);
-  const [aspectRatio, setAspectratop] = useState([]);
-  const [data, setData] = useState();
+  const [isSphere, setIsSphere] = useState(true);
   const [datatoshow, setDatatoshow] = useState();
+  const [aspectRatio, setAspectratop] = useState([]);
+  const cameraRef = useRef();
+  const [data, setData] = useState();
   const glViewRef = useRef(null);
+  const orbitRef = useRef(null);
   const [status, requestPermission] = MediaLibrary.usePermissions();
 
   if (status === null) {
     requestPermission();
   }
+
   const getData = async () => {
     let res = await parsePdbFunction(ligand);
     setData(res);
   };
-  const orbitRef = useRef(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <Button onPress={saveImage} title="Save" />,
+      headerRight: () => (
+        <View
+          style={{
+            flexDirection: "row",
+
+            marginRight: 10,
+            // alignItems: "center",
+            justifyContent: "space-between",
+            width: 60,
+          }}
+        >
+          <Icon
+            name="download"
+            solid
+            size={25}
+            color="#e97560"
+            onPress={() => shareOrSave("save")}
+          />
+          <Icon
+            name="share-alt"
+            // solid
+            size={25}
+            color="#e97560"
+            onPress={() => shareOrSave("share")}
+            title="Save"
+          />
+        </View>
+      ),
       title: `Molucule Name :${ligand}`,
     });
   }, [navigation]);
+
   const handleZoomIn = () => {
     if (cameraRef) {
       if (orbitRef.current) {
@@ -61,18 +91,6 @@ const ViewerScreen = ({ route, navigation }) => {
     }
   };
 
-  const saveImage = async () => {
-    const snapshot = await captureRef(glViewRef, {
-      format: "png",
-      quality: 1,
-    });
-
-    console.log("Totorina:", snapshot);
-    await MediaLibrary.saveToLibraryAsync(snapshot);
-    if (snapshot) {
-      alert("Saved!");
-    }
-  };
   const handleZoomOut = () => {
     if (cameraRef) {
       if (orbitRef.current) {
@@ -82,6 +100,31 @@ const ViewerScreen = ({ route, navigation }) => {
       }
     }
   };
+
+  const shareOrSave = async (value) => {
+    const snapshot = await captureRef(glViewRef, {
+      format: "png",
+      quality: 1,
+    });
+    console.log("shareOrSave", value);
+    if (value === "save") {
+      await MediaLibrary.saveToLibraryAsync(snapshot, "custumesidepicture.png")
+        .then((res) => {
+          console.log(res);
+          alert("Saved!");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      // if (snapshot) {
+      //   alert("Saved!");
+      // }
+    }
+    if (value === "share") {
+    }
+  };
+
   const intersect = ({ nativeEvent }) => {
     const { locationX: x, locationY: y } = nativeEvent;
     const mouse3D = new THREE.Vector3(
@@ -103,12 +146,11 @@ const ViewerScreen = ({ route, navigation }) => {
       }
     }
   };
+
   useEffect(() => {
-    if (isSphere)
-      setGeometry(new SphereGeometry(0.3, 32, 32))
-    else
-      setGeometry(new THREE.BoxGeometry(0.3, 0.3, 0.3))
-  }, [isSphere])
+    if (isSphere) setGeometry(new SphereGeometry(0.3, 32, 32));
+    else setGeometry(new THREE.BoxGeometry(0.3, 0.3, 0.3));
+  }, [isSphere]);
   const onContextCreate = async (gl) => {
     // three.js implementation.
     const scene = new Scene();
@@ -169,8 +211,8 @@ const ViewerScreen = ({ route, navigation }) => {
           const endAtom = data.serials[item];
           const distance = Math.sqrt(
             (endAtom.x - startAtom.x) ** 2 +
-            (endAtom.y - startAtom.y) ** 2 +
-            (endAtom.z - startAtom.z) ** 2
+              (endAtom.y - startAtom.y) ** 2 +
+              (endAtom.z - startAtom.z) ** 2
           );
           const geometry = new CylinderGeometry(0.1, 0.1, distance, 32);
           geometry.translate(0, distance / 2, 0);
@@ -192,6 +234,7 @@ const ViewerScreen = ({ route, navigation }) => {
   useEffect(() => {
     getData();
   }, []);
+
   return (
     <Container>
       {data ? (
@@ -208,8 +251,7 @@ const ViewerScreen = ({ route, navigation }) => {
             }}
             onTouchEndCapture={(event) => {
               const { locationX: x, locationY: y } = event.nativeEvent;
-              if (x == start.x && y == start.y)
-                intersect(event);
+              if (x == start.x && y == start.y) intersect(event);
             }}
             onLayout={(event) => {
               var { width, height } = event.nativeEvent.layout;
@@ -245,14 +287,13 @@ const ViewerScreen = ({ route, navigation }) => {
       ) : (
         <Loading />
       )}
-      {
-        datatoshow &&
+      {datatoshow && (
         <CustomModal
           data={datatoshow}
           visible={visible}
           setVisible={setVisible}
         />
-      }
+      )}
     </Container>
   );
 };
