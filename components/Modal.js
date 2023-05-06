@@ -2,6 +2,15 @@ import React from "react";
 import { Modal, View, Text, StyleSheet } from "react-native";
 import styled from "styled-components";
 
+const ModalContent = ({ title, name }) => {
+  return (
+    <View style={{ display: 'flex', flexDirection: 'row', fontSize: 20 }}>
+      <Text style={{ color: '#e97560', fontWeight: 'bold' }}>{title}</Text>
+      <Text style={{ marginLeft: 5 }}>{name}</Text>
+    </View>
+  )
+}
+
 const CustomModal = ({ data, visible, setVisible }) => {
   console.log(data);
   return (
@@ -9,13 +18,12 @@ const CustomModal = ({ data, visible, setVisible }) => {
       <View style={styles.modalContainer}>
         <View style={[styles.modalView, { backgroundColor: "white" }]}>
           <BottonStyle title="X" onPress={() => setVisible(false)}>
-            <Text>X</Text>
+            <Text style={{ color: '#ffff', fontWeight: 'bold', fontSize: 20 }}>X</Text>
           </BottonStyle>
-          <Text>{`Name: ${data?.name}`}</Text>
-          <Text>{`element: ${data?.element}`}</Text>
-          <Text>{`Phase: ${data?.phase}`}</Text>
-          <Text>{`Discoverd By: ${data?.discoverdBy}`}</Text>
-          {/* <Text>{name}</Text> */}
+          <ModalContent title={`Name: `} name={data?.name} />
+          <ModalContent title={`Element: `} name={data?.element} />
+          <ModalContent title={`Phase: `} name={data?.phase} />
+          <ModalContent title={`Discovered By: `} name={data?.discoverdBy} />
         </View>
       </View>
     </Modal>
@@ -31,10 +39,9 @@ const BottonStyle = styled.TouchableOpacity`
   display: flex;
   align-items: center;
   justify-content: center;
-  /* background: #E97560; */
   border-radius: 12px;
   align-self: flex-end;
-  /* color: #FFFF; */
+  background-color: #e97560;
 `;
 
 const styles = StyleSheet.create({
@@ -47,8 +54,7 @@ const styles = StyleSheet.create({
   modalView: {
     width: 250,
     height: 200,
-    // justifyContent: 'center',
-    alignItems: "center",
+    paddingLeft: 20,
     borderRadius: 10,
   },
 });

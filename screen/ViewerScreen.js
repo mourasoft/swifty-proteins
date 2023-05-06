@@ -237,7 +237,7 @@ const ViewerScreen = ({ route, navigation }) => {
 
   return (
     <Container>
-      {data ? (
+      {(data) ? (
         <View style={{ display: "flex", flex: 1 }}>
           <OrbitControlsView
             key={isSphere}
@@ -281,8 +281,6 @@ const ViewerScreen = ({ route, navigation }) => {
               <TextStyle>Cube</TextStyle>
             </BottonStyle>
           </BottonsWrraper>
-          {/* <BottonsWrraper2>
-        </BottonsWrraper2> */}
         </View>
       ) : (
         <Loading />
