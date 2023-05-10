@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { View, Button } from "react-native";
+import { View, TouchableOpacity } from "react-native";
+import * as Sharing from "expo-sharing";
 import Expo from "expo";
 import { captureRef } from "react-native-view-shot";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -24,8 +25,9 @@ import cpkData from "../utils/data.json";
 import * as MediaLibrary from "expo-media-library";
 import useIsPortrait from "../hooks/useIsPortrait";
 
-const ViewerScreen = ({ route, navigation }) => {
+const ViewerScreen = ({ route, navigation, shareRef }) => {
   const { ligand } = route.params;
+
   const [start, setStart] = useState();
   const [geomet, setGeometry] = useState();
   const [visible, setVisible] = useState(false);
@@ -38,11 +40,6 @@ const ViewerScreen = ({ route, navigation }) => {
   const [data, setData] = useState();
   const glViewRef = useRef(null);
   const orbitRef = useRef(null);
-  const [status, requestPermission] = MediaLibrary.usePermissions();
-
-  if (status === null) {
-    requestPermission();
-  }
 
   const getData = async () => {
     let res = await parsePdbFunction(ligand);
@@ -50,33 +47,32 @@ const ViewerScreen = ({ route, navigation }) => {
   };
 
   useLayoutEffect(() => {
-    navigation.setOptions({
+    navigation?.setOptions({
       headerRight: () => (
         <View
           style={{
             flexDirection: "row",
 
             marginRight: 10,
-            // alignItems: "center",
+
             justifyContent: "space-between",
             width: 60,
           }}
         >
-          <Icon
-            name="download"
-            solid
-            size={25}
-            color="#e97560"
-            onPress={() => shareOrSave("save")}
-          />
-          <Icon
-            name="share-alt"
-            // solid
-            size={25}
-            color="#e97560"
-            onPress={() => shareOrSave("share")}
-            title="Save"
-          />
+          <TouchableOpacity onPress={() => shareOrSave("save")}>
+            <Icon name="download" solid size={25} color="#e97560" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => shareOrSave("share")}>
+            <Icon
+              name="share-alt"
+              size={25}
+              color="#e97560"
+              onPress={() => {
+                shareOrSave("share");
+              }}
+              title="Save"
+            />
+          </TouchableOpacity>
         </View>
       ),
       title: `Molucule Name :${ligand}`,
@@ -108,7 +104,7 @@ const ViewerScreen = ({ route, navigation }) => {
       format: "png",
       quality: 1,
     });
-    console.log("shareOrSave", value);
+
     if (value === "save") {
       await MediaLibrary.saveToLibraryAsync(snapshot, "custumesidepicture.png")
         .then((res) => {
@@ -118,12 +114,21 @@ const ViewerScreen = ({ route, navigation }) => {
         .catch((err) => {
           console.log(err);
         });
-
-      // if (snapshot) {
-      //   alert("Saved!");
-      // }
     }
     if (value === "share") {
+      shareRef.current = true;
+
+      try {
+        await Sharing.shareAsync(snapshot, {
+          dialogTitle: "Title",
+          dialogMessage: "Message",
+        })
+          .then(() => (shareRef.current = false))
+          .catch((err) => (shareRef.current = false));
+      } catch (error) {
+        shareRef.current = false;
+        console.log("Error sharing image:", error);
+      }
     }
   };
 
@@ -166,6 +171,12 @@ const ViewerScreen = ({ route, navigation }) => {
       gl.drawingBufferWidth / gl.drawingBufferHeight,
       0.1,
       1000
+    );
+    console.log(
+      "width:",
+      gl.drawingBufferWidth,
+      "height:",
+      gl.drawingBufferHeight
     );
     cameraRef.current.position.z = 30;
     gl.canvas = {
@@ -238,9 +249,9 @@ const ViewerScreen = ({ route, navigation }) => {
   }, []);
 
   return (
-    <Container>
+    <Container style={{ display: "flex", flex: 1 }}>
       {data ? (
-        <View style={{ display: "flex", flex: 1 }}>
+        <View style={{ display: "flex", flexDirection: "row", flex: 1 }}>
           <OrbitControlsView
             key={[isSphere, portrait]}
             ref={orbitRef}
@@ -248,6 +259,7 @@ const ViewerScreen = ({ route, navigation }) => {
             camera={cameraRef.current}
             enableZoom={true}
             onTouchStart={(event) => {
+              console.log("why");
               const { locationX: x, locationY: y } = event.nativeEvent;
               setStart({ x, y });
             }}
@@ -313,8 +325,8 @@ const Container = styled.View`
   background-color: #fff;
 `;
 const BottonsWrraper = styled.View`
-  width: 100%;
-  /* background-color: #FFf; */
+  /* width: 100%; */
+  background-color: red;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

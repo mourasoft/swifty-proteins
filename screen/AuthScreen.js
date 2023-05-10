@@ -5,18 +5,31 @@ import * as LocalAuthentication from "expo-local-authentication";
 import useIsPortrait from "../hooks/useIsPortrait";
 import PortraitView from "../components/Auth/PortraitView";
 import LandscapeView from "../components/Auth/LandscapeView";
+
 import { Container } from "../styles/StyledAuth";
 
-const AuthScreen = ({ navigation }) => {
+const AuthScreen = ({ navigation, shareRef }) => {
+  let appState = AppState.currentState;
+
   const backAuth = () => {
     navigation.replace("Auth");
     return true;
   };
+
   useEffect(() => {
-    AppState.addEventListener("change", (state) => {
-      if (state === "inactive" || state === "background") backAuth();
-    });
-  }, [navigation]);
+    const handleAppStateChange = (nextAppState) => {
+      if (
+        appState === "active" &&
+        nextAppState.match(/inactive|background/) &&
+        !shareRef.current
+      ) {
+        backAuth();
+      }
+      appState = nextAppState;
+    };
+
+    AppState.addEventListener("change", handleAppStateChange);
+  }, []);
 
   const handleLogin = async () => {
     try {
