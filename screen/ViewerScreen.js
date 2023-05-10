@@ -24,6 +24,7 @@ import CustomModal from "../components/Modal";
 import cpkData from "../utils/data.json";
 import * as MediaLibrary from "expo-media-library";
 import useIsPortrait from "../hooks/useIsPortrait";
+import SaveModal from "../components/saveModal";
 
 const ViewerScreen = ({ route, navigation, shareRef }) => {
   const { ligand } = route.params;
@@ -98,18 +99,20 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
       }
     }
   };
-
+  const [visiblesave, setVisibleSave] = useState(false)
   const shareOrSave = async (value) => {
     const snapshot = await captureRef(glViewRef, {
       format: "png",
       quality: 1,
     });
-
+    
     if (value === "save") {
       await MediaLibrary.saveToLibraryAsync(snapshot, "custumesidepicture.png")
         .then((res) => {
           console.log(res);
-          alert("Saved!");
+          setVisibleSave(true)
+         
+          // alert("Saved!");
         })
         .catch((err) => {
           console.log(err);
@@ -304,8 +307,12 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
           data={datatoshow}
           visible={visible}
           setVisible={setVisible}
-        />
-      )}
+          />
+          )}
+      <SaveModal 
+          visible={visiblesave}
+          setVisible={setVisibleSave}
+      />
     </Container>
   );
 };
@@ -326,31 +333,19 @@ const Container = styled.View`
 `;
 const BottonsWrraper = styled.View`
   /* width: 100%; */
-  background-color: red;
+  align-self: flex-end;
+  /* background-color: red; */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-end;
   position: absolute;
   bottom: 10px;
-  left: 10px;
-  z-index: 100;
-  padding-top: 10px;
-`;
-
-const BottonsWrraper2 = styled.View`
-  width: 100%;
-  /* background-color: #FFf; */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  position: absolute;
-  bottom: 10px;
   right: 10px;
   z-index: 100;
   padding-top: 10px;
 `;
+
 
 const BottonStyle = styled.TouchableOpacity`
   min-width: 40px;
