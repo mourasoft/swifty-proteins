@@ -122,9 +122,8 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
       shareRef.current = true;
 
       try {
-        await Sharing.shareAsync(snapshot, {
+        await Sharing.shareAsync(snapshot,{ 
           dialogTitle: "Title",
-          dialogMessage: "Message",
         })
           .then(() => (shareRef.current = false))
           .catch((err) => (shareRef.current = false));
