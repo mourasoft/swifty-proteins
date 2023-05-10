@@ -1,52 +1,50 @@
 import React from "react";
-import { Modal, View, Text, StyleSheet,TouchableOpacity } from "react-native";
+import { Modal, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import styled from "styled-components";
-import { Linking } from 'react-native';
-
+import { Linking } from "react-native";
 
 const navigateToLink = (url) => {
-  Linking.openURL(url).catch((err) => console.error('Error navigating to link:', err));
+  Linking.openURL(url).catch((err) =>
+    console.error("Error navigating to link:", err)
+  );
 };
 const ModalContent = ({ title, name }) => {
   const words = name.split(" ");
   const newSentence = words.join("_");
   return (
-    <View style={{ display: 'flex', flexDirection: 'row', fontSize: 20 }}>
-      <Text style={{ color: '#e97560', fontWeight: 'bold' }}>{title}</Text>
-      {
-        title === 'Discovered By: ' ?
-          <TouchableOpacity
-            title={name}
-            onPress={() => {
-              console.log('hahahahahah');
-              navigateToLink(`https://fr.wikipedia.org/wiki/${newSentence}`);
-            }} >
-              <Text>{name}</Text>
-            </TouchableOpacity> :
-          <Text style={{ marginLeft: 5 }}>{name}</Text>
-      }
+    <View style={{ display: "flex", flexDirection: "row", fontSize: 20 }}>
+      <Text style={{ color: "#e97560", fontWeight: "bold" }}>{title}</Text>
+      {title === "Discovered By: " ? (
+        <TouchableOpacity
+          title={name}
+          onPress={() => {
+            navigateToLink(`https://fr.wikipedia.org/wiki/${newSentence}`);
+          }}
+        >
+          <Text>{name}</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={{ marginLeft: 5 }}>{name}</Text>
+      )}
     </View>
-  )
-}
+  );
+};
 
 const CustomModal = ({ data, visible, setVisible }) => {
-
   return (
     <Modal transparent visible={visible} animationType="slide">
       <View style={styles.modalContainer}>
         <View style={[styles.modalView, { backgroundColor: "white" }]}>
           <BottonStyle title="X" onPress={() => setVisible(false)}>
-            <Text style={{ color: '#ffff', fontWeight: 'bold', fontSize: 20 }}>X</Text>
+            <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>
+              X
+            </Text>
           </BottonStyle>
           <ModalContent title={`Name: `} name={data?.name} />
           <ModalContent title={`Element: `} name={data?.element} />
           <ModalContent title={`Phase: `} name={data?.phase} />
-          <TouchableOpacity onPress={() => {
-            console.log('hahahahahah');
-            // navigateToLink(`https://fr.wikipedia.org/wiki/${newSentence}`);
-          }}>
-            <ModalContent title={`Discovered By: `} name={data?.discoverdBy} />
-          </TouchableOpacity>
+
+          <ModalContent title={`Discovered By: `} name={data?.discoverdBy} />
         </View>
       </View>
     </Modal>

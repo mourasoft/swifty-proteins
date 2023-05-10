@@ -99,19 +99,18 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
       }
     }
   };
-  const [visiblesave, setVisibleSave] = useState(false)
+  const [visiblesave, setVisibleSave] = useState(false);
   const shareOrSave = async (value) => {
     const snapshot = await captureRef(glViewRef, {
       format: "png",
       quality: 1,
     });
-    
+
     if (value === "save") {
       await MediaLibrary.saveToLibraryAsync(snapshot, "custumesidepicture.png")
         .then((res) => {
-          console.log(res);
-          setVisibleSave(true)
-         
+          setVisibleSave(true);
+
           // alert("Saved!");
         })
         .catch((err) => {
@@ -122,7 +121,7 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
       shareRef.current = true;
 
       try {
-        await Sharing.shareAsync(snapshot,{ 
+        await Sharing.shareAsync(snapshot, {
           dialogTitle: "Title",
         })
           .then(() => (shareRef.current = false))
@@ -144,11 +143,10 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
 
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse3D, cameraRef.current);
-    // console.log(objects);
+
     const intersects = raycaster.intersectObjects(objects);
-    // const intersects = raycaster.intersectObjects(objects);
+
     if (intersects.length > 0) {
-      // console.log(intersects[0].object.name);
       if (intersects[0].object.name) {
         setDatatoshow(JSON.parse(intersects[0].object.name));
         setVisible(true);
@@ -174,12 +172,7 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
       0.1,
       1000
     );
-    console.log(
-      "width:",
-      gl.drawingBufferWidth,
-      "height:",
-      gl.drawingBufferHeight
-    );
+
     cameraRef.current.position.z = 30;
     gl.canvas = {
       width: gl.drawingBufferWidth,
@@ -242,7 +235,6 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
         });
       });
     } else {
-      console.log("errot dat");
     }
     render();
   };
@@ -261,7 +253,6 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
             camera={cameraRef.current}
             enableZoom={true}
             onTouchStart={(event) => {
-              console.log("why");
               const { locationX: x, locationY: y } = event.nativeEvent;
               setStart({ x, y });
             }}
@@ -306,12 +297,9 @@ const ViewerScreen = ({ route, navigation, shareRef }) => {
           data={datatoshow}
           visible={visible}
           setVisible={setVisible}
-          />
-          )}
-      <SaveModal 
-          visible={visiblesave}
-          setVisible={setVisibleSave}
-      />
+        />
+      )}
+      <SaveModal visible={visiblesave} setVisible={setVisibleSave} />
     </Container>
   );
 };
@@ -344,7 +332,6 @@ const BottonsWrraper = styled.View`
   z-index: 100;
   padding-top: 10px;
 `;
-
 
 const BottonStyle = styled.TouchableOpacity`
   min-width: 40px;

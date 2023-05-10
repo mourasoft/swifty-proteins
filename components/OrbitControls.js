@@ -564,7 +564,6 @@ export class OrbitControls extends EventDispatcher {
         case 1:
           switch (this.touches.ONE) {
             case TOUCH.ROTATE:
-              //   console.log("diana");
               if (this.enableRotate === false) return;
               this.handleTouchStartRotate(event);
               this.state = STATE.TOUCH_ROTATE;
