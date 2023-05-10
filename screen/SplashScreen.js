@@ -35,9 +35,9 @@ const SplashScreen = ({ navigation }) => {
         autoPlay
         loop={false}
         style={{
-          width: "100%",
-          height: "auto",
-          maxWidth: 380,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
         }}
         source={splashLogo}
       />

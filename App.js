@@ -20,13 +20,9 @@ export default function App() {
         <Stack.Screen
           name="Splash"
           component={SplashScreen}
-          options={{ headerShown: false, orientation: "portrait" }}
-        />
-        <Stack.Screen
-          name="Auth"
-          // component={AuthScreen}
           options={{ headerShown: false }}
-        >
+        />
+        <Stack.Screen name="Auth" options={{ headerShown: false }}>
           {(props) => <AuthScreen {...props} shareRef={shareRef} />}
         </Stack.Screen>
 
@@ -38,15 +34,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-const Container = styled.View`
-  flex: 1;
-  background-color: white;
-  align-items: center;
-  justify-content: center;
-`;
-const Texts = styled.Text`
-  font-size: 18px;
-  color: blue;
-  font-weight: 500;
-`;
