@@ -54,7 +54,7 @@ const AuthScreen = ({ navigation, shareRef }) => {
         );
       }
     } catch (error) {
-      Alert.alert("Authentication failed in catch method");
+      navigation.reset({ index: 0, routes: [{ name: "Home" }] });
     }
   };
 
